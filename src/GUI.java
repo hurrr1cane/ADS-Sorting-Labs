@@ -429,7 +429,7 @@ public class GUI {
         gbc.gridx = 3;  // Adjust the column index to place it on the top-right
         gbc.gridy = 0;
         gbc.gridwidth = 1;
-        gbc.gridheight = 2; // Adjust the grid height to accommodate the existing radio buttons
+        gbc.gridheight = 1; // Adjust the grid height to accommodate the existing radio buttons
         mainPanel.add(radioButtonPanelNumbers, gbc);
 
         // Create and return a TaskPanel record with the initialized radio buttons
@@ -539,7 +539,7 @@ public class GUI {
      * @return The initialized JFrame.
      */
     private static JFrame initializeFrame() {
-        JFrame frame = new JFrame("Matrix Application");
+        JFrame frame = new JFrame("Sorting algorithms");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(600, 400);
         Dimension minimumSize = new Dimension(600, 400);

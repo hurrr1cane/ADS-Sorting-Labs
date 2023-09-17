@@ -27,10 +27,10 @@ public class Tools<T extends Comparable<T>> {
     /**
      * Initializes an array of numbers with random values.
      *
-     * @param arrayOfNumbers   The array to initialize.
-     * @param useHugeNumbers   Indicates whether to use a range for huge numbers.
-     *                         If true, the range includes Integer.MIN_VALUE to Integer.MAX_VALUE;
-     *                         otherwise, the range is from 0 to 100.
+     * @param arrayOfNumbers The array to initialize.
+     * @param useHugeNumbers Indicates whether to use a range for huge numbers.
+     *                       If true, the range includes Integer.MIN_VALUE to Integer.MAX_VALUE;
+     *                       otherwise, the range is from 0 to 100.
      */
     public static <T extends Number> void initializeArray(T[] arrayOfNumbers, boolean useHugeNumbers) {
         Random rand = new Random();
