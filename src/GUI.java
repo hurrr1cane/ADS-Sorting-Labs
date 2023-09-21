@@ -8,9 +8,15 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import static com.mhorak.dsa.tools.Tools.decimalFormat;
+import static com.mhorak.dsa.tools.Tools.filePath;
 
 /**
  * Just the GUI. Makes all the work.
@@ -189,7 +195,11 @@ public class GUI {
             if (targetArray.length <= 15) {
                 matrixArea.setText("");
                 for (int i = 0; i < targetArray.length; i++) {
-                    matrixArea.append(targetArray[i] + " ");
+                    if (targetArray[i] instanceof Double) {
+                        matrixArea.append(decimalFormat.format(targetArray[i]) + " ");
+                    } else {
+                        matrixArea.append(targetArray[i] + " ");
+                    }
                 }
             } else {
                 matrixArea.setText("Array was generated");
@@ -205,10 +215,16 @@ public class GUI {
                 if (targetArray.length <= 15) {
                     matrixArea.append("\n");
                     for (int i = 0; i < targetArray.length; i++) {
-                        matrixArea.append(targetArray[i] + " ");
+                        if (targetArray[i] instanceof Double) {
+                            matrixArea.append(decimalFormat.format(targetArray[i]) + " ");
+                        } else {
+                            matrixArea.append(targetArray[i] + " ");
+                        }
                     }
                 }
             }
+
+            writeArrayToFile(targetArray, filePath, true);
 
             return targetArray;
         } catch (Exception exception) {
@@ -244,10 +260,14 @@ public class GUI {
                 if (taskPanel.standardRadioButton().isSelected()) {
                     // Sort the array of Integers
                     sortArray(arrayOfNumbersInt, sortingMethods, timer, matrixArea, showProcessCheckBox);
+                    writeArrayToFile(arrayOfNumbersInt, filePath, false);
                 } else if (taskPanel.individualRadioButton().isSelected()) {
                     // Sort the array of Doubles
                     sortArray(arrayOfNumbersDouble, sortingMethods, timer, matrixArea, showProcessCheckBox);
+                    writeArrayToFile(arrayOfNumbersInt, filePath, false);
                 }
+
+
             }
         });
     }
@@ -575,6 +595,34 @@ public class GUI {
      */
     private ArrayList performStepSorting() {
         return sortingAlgorithm.sortWithSteps();
+    }
+
+    /**
+     * Writes an array of numbers to a text file, optionally cleaning the file before writing.
+     *
+     * @param array      The array of numbers to be written to the file.
+     * @param outputPath The path to the output file where the array will be written.
+     * @param cleanFile  If set to true, the file will be cleaned before writing; if false, the array will be appended to the file.
+     * @param <T>        The type of elements in the array (e.g., Integer, Double).
+     */
+    private <T extends Number> void writeArrayToFile(T[] array, String outputPath, boolean cleanFile) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath, !cleanFile))) {
+            if (cleanFile) {
+                // Clean the file by truncating it if necessary
+                writer.write(""); // This effectively truncates the file
+            }
+            else {
+                writer.newLine();
+                writer.newLine();
+            }
+
+            for (T element : array) {
+                writer.write(element.toString());
+                writer.write(" "); // Separate elements with a space
+            }
+        } catch (IOException e) {
+            e.printStackTrace(); // Handle the exception appropriately in your application
+        }
     }
 }
 

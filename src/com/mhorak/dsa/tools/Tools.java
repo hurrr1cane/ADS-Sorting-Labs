@@ -1,5 +1,6 @@
 package com.mhorak.dsa.tools;
 
+import java.text.DecimalFormat;
 import java.util.Random;
 
 /**
@@ -8,6 +9,10 @@ import java.util.Random;
  * @param <T> The type of elements in the array, which must implement the Comparable interface.
  */
 public class Tools<T extends Comparable<T>> {
+
+    public static final String filePath = "Output.txt";
+
+    public static final DecimalFormat decimalFormat = new DecimalFormat("0.00"); // Pattern for two digits after the decimal point
 
     /**
      * Checks if an array is sorted in ascending order.
