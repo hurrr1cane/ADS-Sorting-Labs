@@ -1,4 +1,5 @@
 import com.mhorak.dsa.sort.SelectionSort;
+import com.mhorak.dsa.sort.ShellSort;
 import com.mhorak.dsa.sort.Sort;
 import com.mhorak.dsa.tools.Tools;
 
@@ -287,7 +288,7 @@ public class GUI {
             // Initialize and perform selection sort
             sortingAlgorithm = new SelectionSort(arrayOfNumbers);
         } else if (sortingMethods.shellSort().isSelected()) {
-            // Shell sort implementation will be added here later
+            sortingAlgorithm = new ShellSort(arrayOfNumbers);
         }
 
         if (showProcessCheckBox.isSelected()) {
