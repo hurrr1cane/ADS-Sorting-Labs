@@ -298,10 +298,29 @@ public class GUI {
         } else {
             // Perform the sorting without displaying the process
             performSorting();
+            showSortedArray(arrayOfNumbers, matrixArea);
         }
 
         // Display the sorting timer
         showTimer(timer);
+    }
+
+    /**
+     * Shows sorted array in matrixArea
+     *
+     * @param arrayOfNumbers Array of numbers to display.
+     * @param matrixArea The text area where the sorted array will be displayed.
+     */
+    private static void showSortedArray(Comparable[] arrayOfNumbers, JTextArea matrixArea) {
+        if (arrayOfNumbers.length <= 15) {
+            matrixArea.append("\n");
+            for (var element: arrayOfNumbers) {
+                matrixArea.append(element + " ");
+            }
+        }
+        else {
+            matrixArea.append("\nThe array is sorted");
+        }
     }
 
     /**
