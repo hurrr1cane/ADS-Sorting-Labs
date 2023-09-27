@@ -265,7 +265,7 @@ public class GUI {
                 } else if (taskPanel.individualRadioButton().isSelected()) {
                     // Sort the array of Doubles
                     sortArray(arrayOfNumbersDouble, sortingMethods, timer, matrixArea, showProcessCheckBox);
-                    writeArrayToFile(arrayOfNumbersInt, filePath, false);
+                    writeArrayToFile(arrayOfNumbersDouble, filePath, false);
                 }
 
 
@@ -334,7 +334,12 @@ public class GUI {
         matrixArea.setText(""); // Clear the text area
         for (int i = 0; i < arraySteps.size(); i++) {
             for (int j = 0; j < arraySteps.get(i).length; j++) {
-                matrixArea.append(arraySteps.get(i)[j] + " "); // Append each element to the text area
+                if (arraySteps.get(i)[j] instanceof Double) {
+                    matrixArea.append((decimalFormat.format(arraySteps.get(i)[j]) + " "));
+                }
+                else {
+                    matrixArea.append(arraySteps.get(i)[j] + " "); // Append each element to the text area
+                }
             }
             matrixArea.append("\n"); // Add a new line after each step
         }
