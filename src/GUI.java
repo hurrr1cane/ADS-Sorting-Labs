@@ -7,12 +7,9 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -25,13 +22,10 @@ import static com.mhorak.dsa.tools.Tools.filePath;
 public class GUI {
 
     /**
-     * An array of integers used for storing and manipulating integer values.
+     * An array of numbers.
      */
-    private Integer[] arrayOfNumbersInt;
-    /**
-     * An array of doubles used for storing and manipulating double-precision floating-point values.
-     */
-    private Double[] arrayOfNumbersDouble;
+    private Object[] arrayOfNumbers;
+
     /**
      * An instance of the sorting algorithm used for sorting the array.
      */
@@ -51,16 +45,17 @@ public class GUI {
         gbc.insets = new Insets(5, 5, 5, 5); // Add spacing
 
         // Create a label at the top
-        JLabel label = initializeLabel("Enter a number:", gbc, 0, mainPanel);
+        initializeLabel("Enter a number:", gbc, 0, mainPanel);
 
+        MayTheProcessBeActive mayTheProcessBeActive = new MayTheProcessBeActive(false, true);
         // Create a checkbox for showing a process (disabled by default)
         JCheckBox showProcessCheckBox = initializeShowProcessCheckbox(gbc, mainPanel);
 
         // Create a text field for user input
-        JTextField inputField = initializeNumberField(gbc, mainPanel, showProcessCheckBox);
+        JTextField inputField = initializeNumberField(gbc, mainPanel, showProcessCheckBox, mayTheProcessBeActive);
 
         // Create a panel for task selection (e.g., "Standard" or "Individual")
-        TaskPanel taskPanel = getTaskPanel(gbc, mainPanel);
+        TaskPanel taskPanel = getTaskPanel(gbc, mainPanel, showProcessCheckBox, mayTheProcessBeActive);
 
         // Create a JTextArea for displaying the matrix
         JTextArea matrixArea = initializeMatrixArea(gbc, mainPanel);
@@ -69,7 +64,7 @@ public class GUI {
         SortingMethods sortingMethods = getSortingMethods(gbc, mainPanel);
 
         // Initialize the "Generate array" button
-        initializeGenerateButton(gbc, mainPanel, taskPanel, inputField, matrixArea);
+        initializeGenerateButton(gbc, mainPanel, sortingMethods, taskPanel, inputField, matrixArea);
 
         // Initialize the timer label for displaying sorting time
         JLabel timer = initializeLabel("Sorting time: ", gbc, 4, mainPanel);
@@ -78,7 +73,7 @@ public class GUI {
         initializeSortButton(gbc, mainPanel, taskPanel, sortingMethods, timer, matrixArea, showProcessCheckBox);
 
         // Initialize the "Sorted?" button for checking if the array is sorted
-        initializeSortedButton(gbc, mainPanel, taskPanel);
+        initializeSortedButton(gbc, mainPanel);
 
         // Add the main panel to the frame
         frame.add(mainPanel);
@@ -94,37 +89,27 @@ public class GUI {
      *
      * @param gbc       The GridBagConstraints for specifying the button's layout.
      * @param mainPanel The main panel where the button will be added.
-     * @param taskPanel The TaskPanel containing task selection radio buttons.
      */
-    private void initializeSortedButton(GridBagConstraints gbc, JPanel mainPanel, TaskPanel taskPanel) {
+    private void initializeSortedButton(GridBagConstraints gbc, JPanel mainPanel) {
         JButton sortedButton = new JButton("Sorted?");
         gbc.gridx = 2;
         gbc.gridy = 3;
         gbc.gridwidth = 1;
         mainPanel.add(sortedButton, gbc);
 
-        sortedButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    boolean isSorted;
-                    // Check if the array is sorted
-                    if (taskPanel.standardRadioButton().isSelected()) {
-                        isSorted = new Tools().isArraySorted(arrayOfNumbersInt);
-                    } else {
-                        isSorted = new Tools().isArraySorted(arrayOfNumbersDouble);
-                    }
+        sortedButton.addActionListener(e -> {
+            try {
+                boolean isSorted;
+                // Check if the array is sorted
+                isSorted = Tools.isArraySorted(arrayOfNumbers);
 
-                    // Display a message popup based on whether the array is sorted or not
-                    if (isSorted) {
-                        JOptionPane.showMessageDialog(null, "The array is sorted.", "Array Status", JOptionPane.INFORMATION_MESSAGE);
-                    } else {
-                        JOptionPane.showMessageDialog(null, "The array is not sorted.", "Array Status", JOptionPane.WARNING_MESSAGE);
-                    }
-                } catch (Exception exception) {
-                    // Handle any exceptions that may occur during array sorting check.
-                    // In a production application, you should provide meaningful error handling.
+                // Display a message popup based on whether the array is sorted or not
+                if (isSorted) {
+                    JOptionPane.showMessageDialog(null, "The array is sorted.", "Array Status", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(null, "The array is not sorted.", "Array Status", JOptionPane.WARNING_MESSAGE);
                 }
+            } catch (Exception exception) {
             }
         });
     }
@@ -139,28 +124,28 @@ public class GUI {
      * @param inputField The text field for user input.
      * @param matrixArea The text area for displaying the generated array.
      */
-    private void initializeGenerateButton(GridBagConstraints gbc, JPanel mainPanel, TaskPanel taskPanel, JTextField inputField, JTextArea matrixArea) {
+    private void initializeGenerateButton(GridBagConstraints gbc, JPanel mainPanel, SortingMethods sortingMethods, TaskPanel taskPanel, JTextField inputField, JTextArea matrixArea) {
         JButton generateButton = new JButton("Generate array");
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.gridwidth = 1;
         mainPanel.add(generateButton, gbc);
 
-        generateButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    if (taskPanel.standardRadioButton().isSelected()) {
-                        // Generate and display an array of Integers
-                        arrayOfNumbersInt = generateAndDisplayArray(inputField, matrixArea, Integer.class, 0, taskPanel.hugeNumbersRadioButton().isSelected());
-                    } else if (taskPanel.individualRadioButton().isSelected()) {
+        generateButton.addActionListener(e -> {
+            try {
+                if (taskPanel.standardRadioButton().isSelected()) {
+                    // Generate and display an array of Integers
+                    arrayOfNumbers = generateAndDisplayArray(inputField, matrixArea, 0, taskPanel.hugeNumbersRadioButton().isSelected());
+                } else if (taskPanel.individualRadioButton().isSelected()) {
+
+                    if (sortingMethods.selectionSort.isSelected()) {
                         // Generate and display an array of Doubles
-                        arrayOfNumbersDouble = generateAndDisplayArray(inputField, matrixArea, Double.class, 0.0, taskPanel.hugeNumbersRadioButton().isSelected());
+                        arrayOfNumbers = generateAndDisplayArray(inputField, matrixArea, 1, taskPanel.hugeNumbersRadioButton().isSelected());
+                    } else if (sortingMethods.shellSort.isSelected()) {
+                        arrayOfNumbers = generateAndDisplayArray(inputField, matrixArea, 2, taskPanel.hugeNumbersRadioButton().isSelected());
                     }
-                } catch (Exception exception) {
-                    // Handle any exceptions that may occur during array generation.
-                    // In a production application, you should provide meaningful error handling.
                 }
+            } catch (Exception exception) {
             }
         });
     }
@@ -170,46 +155,72 @@ public class GUI {
      *
      * @param inputField     The text field for user input.
      * @param matrixArea     The text area for displaying the generated array.
-     * @param elementType    The class representing the type of elements in the array (e.g., Integer.class, Double.class).
-     * @param defaultValue   The default value for elements in the array.
+     * @param labNumber      The number of lab to decide a variant.
      * @param useHugeNumbers Indicates whether to use huge numbers in the generated array.
      * @return The generated array.
      */
-    private <T extends Number> T[] generateAndDisplayArray(
+    private Object[] generateAndDisplayArray(
             JTextField inputField,
             JTextArea matrixArea,
-            Class<T> elementType,
-            T defaultValue,
+            int labNumber,
             boolean useHugeNumbers
     ) {
         try {
             int input = Integer.parseInt(inputField.getText());
-            T[] targetArray = (T[]) Array.newInstance(elementType, input);
-            Arrays.fill(targetArray, defaultValue);
-
-            if (useHugeNumbers) {
-                Tools.initializeArray(targetArray, true); // Use huge numbers
-            } else {
-                Tools.initializeArray(targetArray, false); // Use low numbers
+            Object[] targetArray;
+            switch (labNumber) {
+                case 0 -> {
+                    targetArray = new Integer[input];
+                    Arrays.fill(targetArray, 0);
+                }
+                case 1 -> {
+                    targetArray = new Double[input];
+                    Arrays.fill(targetArray, 0.0);
+                }
+                case 2 -> {
+                    targetArray = new Double[input][input];
+                    for (Object row : targetArray) {
+                        Arrays.fill((Double[]) row, 0.0);
+                    }
+                }
+                default -> {
+                    targetArray = new Integer[input];
+                    Arrays.fill(targetArray, 0);
+                }
             }
+
+            Tools.initializeArray(targetArray, useHugeNumbers);
 
             if (targetArray.length <= 15) {
                 matrixArea.setText("");
-                for (int i = 0; i < targetArray.length; i++) {
-                    if (targetArray[i] instanceof Double) {
-                        matrixArea.append(decimalFormat.format(targetArray[i]) + " ");
-                    } else {
-                        matrixArea.append(targetArray[i] + " ");
+
+                if (targetArray[0] instanceof Double[]) {
+                    assert targetArray instanceof Double[][];
+                    Double[][] newArray = (Double[][]) targetArray;
+                    for (Double[] element : newArray) {
+                        for (Double elemento : element) {
+                            matrixArea.append(decimalFormat.format(elemento) + " ");
+                        }
+                        matrixArea.append("\n");
+                    }
+                } else if (targetArray[0] instanceof Double) {
+                    for (var element : targetArray) {
+                        matrixArea.append(decimalFormat.format(element) + " ");
+                    }
+                } else {
+                    for (var element : targetArray) {
+                        matrixArea.append(element + " ");
                     }
                 }
+
             } else {
                 matrixArea.setText("Array was generated");
             }
 
-            /**
+            /*
              * Applying an individual variant function
              */
-            if (targetArray[0] instanceof Double) {
+            if (labNumber == 1) {
                 Tools.mutateArray((Double[]) targetArray);
 
                 //Printing new array so the function is visible
@@ -229,8 +240,6 @@ public class GUI {
 
             return targetArray;
         } catch (Exception exception) {
-            // Handle any exceptions that may occur during array generation.
-            // In a production application, you should provide meaningful error handling.
             return null;
         }
     }
@@ -255,22 +264,48 @@ public class GUI {
         gbc.gridwidth = 1;
         mainPanel.add(sortButton, gbc);
 
-        sortButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (taskPanel.standardRadioButton().isSelected()) {
-                    // Sort the array of Integers
-                    sortArray(arrayOfNumbersInt, sortingMethods, timer, matrixArea, showProcessCheckBox);
-                    writeArrayToFile(arrayOfNumbersInt, filePath, false);
-                } else if (taskPanel.individualRadioButton().isSelected()) {
-                    // Sort the array of Doubles
-                    sortArray(arrayOfNumbersDouble, sortingMethods, timer, matrixArea, showProcessCheckBox);
-                    writeArrayToFile(arrayOfNumbersDouble, filePath, false);
-                }
-
-
+        sortButton.addActionListener(e -> {
+            if (taskPanel.standardRadioButton().isSelected()) {
+                // Sort the array of Integers
+                sortArrayLab((Integer[]) arrayOfNumbers, sortingMethods, timer, matrixArea, showProcessCheckBox);
+                writeArrayToFile(arrayOfNumbers, filePath, false);
+            } else if (taskPanel.individualRadioButton().isSelected()) {
+                // Sort the array of Doubles
+                sortArrayIndividual(arrayOfNumbers, sortingMethods, timer, matrixArea);
+                writeArrayToFile(arrayOfNumbers, filePath, false);
             }
         });
+    }
+
+    /**
+     * Sorts an array of comparable elements using the selected sorting method.
+     * Displays the sorting process and timer based on user preferences.
+     *
+     * @param arrayOfNumbers The array of comparable elements to be sorted.
+     * @param sortingMethods An instance of SortingMethods that provides sorting method selection.
+     * @param timer          The label to display sorting time.
+     * @param matrixArea     The text area for displaying the sorting process.
+     */
+    private void sortArrayIndividual(Object arrayOfNumbers, SortingMethods sortingMethods, JLabel timer, JTextArea matrixArea) {
+        // Determine the selected sorting method and initialize sortingAlgorithm
+        if (sortingMethods.selectionSort().isSelected()) {
+            sortingAlgorithm = new SelectionSort();
+        } else if (sortingMethods.shellSort().isSelected()) {
+            sortingAlgorithm = new ShellSort();
+        }
+
+        // Sort the array based on the selected sorting method
+        if (sortingMethods.selectionSort().isSelected()) {
+            arrayOfNumbers = sortingAlgorithm.sortIndividual((Double[]) arrayOfNumbers);
+        } else if (sortingMethods.shellSort().isSelected()) {
+            arrayOfNumbers = sortingAlgorithm.sortIndividual((Double[][]) arrayOfNumbers);
+        }
+
+        // Display the sorted array in the matrixArea
+        showSortedArray((Object[]) arrayOfNumbers, matrixArea);
+
+        // Display the sorting timer
+        showTimer(timer);
     }
 
     /**
@@ -283,21 +318,21 @@ public class GUI {
      * @param matrixArea          The text area for displaying the sorting process.
      * @param showProcessCheckBox The checkbox to control whether to show the sorting process.
      */
-    private void sortArray(Comparable[] arrayOfNumbers, SortingMethods sortingMethods, JLabel timer, JTextArea matrixArea, JCheckBox showProcessCheckBox) {
+    private void sortArrayLab(Integer[] arrayOfNumbers, SortingMethods sortingMethods, JLabel timer, JTextArea matrixArea, JCheckBox showProcessCheckBox) {
         if (sortingMethods.selectionSort().isSelected()) {
             // Initialize and perform selection sort
-            sortingAlgorithm = new SelectionSort(arrayOfNumbers);
+            sortingAlgorithm = new SelectionSort();
         } else if (sortingMethods.shellSort().isSelected()) {
-            sortingAlgorithm = new ShellSort(arrayOfNumbers);
+            sortingAlgorithm = new ShellSort();
         }
 
         if (showProcessCheckBox.isSelected()) {
             // Display the sorting process step by step
-            var arraySteps = performStepSorting();
+            ArrayList<Integer[]> arraySteps = sortingAlgorithm.sortLabWithSteps(arrayOfNumbers);
             fillMatrix(matrixArea, arraySteps);
         } else {
             // Perform the sorting without displaying the process
-            performSorting();
+            arrayOfNumbers = sortingAlgorithm.sortLab(arrayOfNumbers);
             showSortedArray(arrayOfNumbers, matrixArea);
         }
 
@@ -309,16 +344,29 @@ public class GUI {
      * Shows sorted array in matrixArea
      *
      * @param arrayOfNumbers Array of numbers to display.
-     * @param matrixArea The text area where the sorted array will be displayed.
+     * @param matrixArea     The text area where the sorted array will be displayed.
      */
-    private static void showSortedArray(Comparable[] arrayOfNumbers, JTextArea matrixArea) {
+    private static void showSortedArray(Object[] arrayOfNumbers, JTextArea matrixArea) {
         if (arrayOfNumbers.length <= 15) {
             matrixArea.append("\n");
-            for (var element: arrayOfNumbers) {
-                matrixArea.append(element + " ");
+            if (arrayOfNumbers[0] instanceof Double[]) {
+                Double[][] newArray = (Double[][]) arrayOfNumbers;
+                for (var element : newArray) {
+                    for (var elemento : element) {
+                        matrixArea.append(decimalFormat.format(elemento) + " ");
+                    }
+                    matrixArea.append("\n");
+                }
+            } else if (arrayOfNumbers[0] instanceof Double) {
+                for (var element : arrayOfNumbers) {
+                    matrixArea.append(decimalFormat.format(element) + " ");
+                }
+            } else {
+                for (var element : arrayOfNumbers) {
+                    matrixArea.append(element + " ");
+                }
             }
-        }
-        else {
+        } else {
             matrixArea.append("\nThe array is sorted");
         }
     }
@@ -330,16 +378,11 @@ public class GUI {
      * @param matrixArea The text area where the sorting process will be displayed.
      * @param arraySteps An ArrayList containing arrays representing steps of the sorting process.
      */
-    private void fillMatrix(JTextArea matrixArea, ArrayList<Comparable[]> arraySteps) {
+    private void fillMatrix(JTextArea matrixArea, ArrayList<Integer[]> arraySteps) {
         matrixArea.setText(""); // Clear the text area
         for (int i = 0; i < arraySteps.size(); i++) {
             for (int j = 0; j < arraySteps.get(i).length; j++) {
-                if (arraySteps.get(i)[j] instanceof Double) {
-                    matrixArea.append((decimalFormat.format(arraySteps.get(i)[j]) + " "));
-                }
-                else {
-                    matrixArea.append(arraySteps.get(i)[j] + " "); // Append each element to the text area
-                }
+                matrixArea.append(arraySteps.get(i)[j] + " "); // Append each element to the text area
             }
             matrixArea.append("\n"); // Add a new line after each step
         }
@@ -428,7 +471,7 @@ public class GUI {
      * @param mainPanel The main panel where the TaskPanel will be added.
      * @return The initialized TaskPanel with radio buttons for task and number type selection.
      */
-    private static TaskPanel getTaskPanel(GridBagConstraints gbc, JPanel mainPanel) {
+    private static TaskPanel getTaskPanel(GridBagConstraints gbc, JPanel mainPanel, JCheckBox showProcessCheckbox, MayTheProcessBeActive mayTheProcessBeActive) {
         // Create a panel for task-related radio buttons
         JPanel radioButtonPanelTask = new JPanel();
         radioButtonPanelTask.setLayout(new GridLayout(2, 1)); // Two rows, one column
@@ -442,10 +485,26 @@ public class GUI {
         radioButtonGroupTask.add(standardRadioButton);
         radioButtonPanelTask.add(standardRadioButton);
 
+        standardRadioButton.addActionListener(e -> {
+            if (standardRadioButton.isSelected()) {
+                mayTheProcessBeActive.labVariant = true;
+                showProcessCheckbox.setEnabled(mayTheProcessBeActive.canBeEnabled());
+            }
+        });
+
+
         // Create the "Individual" radio button
         JRadioButton individualRadioButton = new JRadioButton("Individual");
         radioButtonGroupTask.add(individualRadioButton);
         radioButtonPanelTask.add(individualRadioButton);
+
+        individualRadioButton.addActionListener(e -> {
+            if (individualRadioButton.isSelected()) {
+                showProcessCheckbox.setSelected(false);
+                mayTheProcessBeActive.labVariant = false;
+                showProcessCheckbox.setEnabled(mayTheProcessBeActive.canBeEnabled());
+            }
+        });
 
         // Add the radio button panel for task selection to the top-right corner of the main panel
         gbc.gridx = 3;  // Adjust the column index to place it on the top-right
@@ -493,12 +552,13 @@ public class GUI {
      * Initializes a JTextField for entering the number of elements in the array and adds it to the main panel.
      * Also, creates a DocumentListener to monitor changes in the inputField and enable/disable the showProcessCheckBox accordingly.
      *
-     * @param gbc                 The GridBagConstraints for specifying the layout of the input field.
-     * @param mainPanel           The main panel where the input field will be added.
-     * @param showProcessCheckBox The checkbox to be enabled or disabled based on the inputField's value.
+     * @param gbc                   The GridBagConstraints for specifying the layout of the input field.
+     * @param mainPanel             The main panel where the input field will be added.
+     * @param showProcessCheckBox   The checkbox to be enabled or disabled based on the inputField's value.
+     * @param mayTheProcessBeActive An instance of the {@link MayTheProcessBeActive} class that determines whether the process can be active.
      * @return The initialized JTextField for entering the number of elements in the array.
      */
-    private static JTextField initializeNumberField(GridBagConstraints gbc, JPanel mainPanel, JCheckBox showProcessCheckBox) {
+    private static JTextField initializeNumberField(GridBagConstraints gbc, JPanel mainPanel, JCheckBox showProcessCheckBox, MayTheProcessBeActive mayTheProcessBeActive) {
         JTextField inputField = new JTextField(10);
         gbc.gridx = 1;
         gbc.gridy = 0;
@@ -529,13 +589,17 @@ public class GUI {
             private void updateCheckBox() {
                 try {
                     int value = Integer.parseInt(inputField.getText());
-                    showProcessCheckBox.setEnabled(value > 0 && value <= 15);
+                    mayTheProcessBeActive.numberOfElements = (value > 0 && value <= 15);
+                    showProcessCheckBox.setEnabled(mayTheProcessBeActive.canBeEnabled());
+
                     if (!showProcessCheckBox.isEnabled()) {
                         showProcessCheckBox.setSelected(false);
+
                     }
                 } catch (NumberFormatException ex) {
                     // Handle the case where the input is not a valid number
-                    showProcessCheckBox.setEnabled(false);
+                    mayTheProcessBeActive.numberOfElements = false;
+                    showProcessCheckBox.setEnabled(mayTheProcessBeActive.canBeEnabled());
                 }
             }
         });
@@ -603,50 +667,75 @@ public class GUI {
                 sortingAlgorithm.getTimeOfProcessing().getNano() / 1000 % 1000 + "mks");
     }
 
-
-    /**
-     * Performs sorting using the selected sorting algorithm.
-     */
-    private void performSorting() {
-        if (sortingAlgorithm != null) {
-            sortingAlgorithm.sort();
-        }
-    }
-
-    /**
-     * Performs sorting with steps using the selected sorting algorithm.
-     *
-     * @return An ArrayList containing steps of the sorting process.
-     */
-    private ArrayList performStepSorting() {
-        return sortingAlgorithm.sortWithSteps();
-    }
-
     /**
      * Writes an array of numbers to a text file, optionally cleaning the file before writing.
      *
      * @param array      The array of numbers to be written to the file.
      * @param outputPath The path to the output file where the array will be written.
      * @param cleanFile  If set to true, the file will be cleaned before writing; if false, the array will be appended to the file.
-     * @param <T>        The type of elements in the array (e.g., Integer, Double).
      */
-    private <T extends Number> void writeArrayToFile(T[] array, String outputPath, boolean cleanFile) {
+    private void writeArrayToFile(Object[] array, String outputPath, boolean cleanFile) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath, !cleanFile))) {
             if (cleanFile) {
                 // Clean the file by truncating it if necessary
                 writer.write(""); // This effectively truncates the file
-            }
-            else {
+            } else {
                 writer.newLine();
                 writer.newLine();
             }
-
-            for (T element : array) {
-                writer.write(element.toString());
-                writer.write(" "); // Separate elements with a space
+            if (array[0] instanceof Double[]) {
+                Double[][] newArray = (Double[][]) array;
+                for (var element : newArray) {
+                    for (var elemento : element) {
+                        writer.write(elemento.toString());
+                        writer.write(" "); // Separate elements with a space
+                    }
+                    writer.write("\n");
+                }
+            } else {
+                for (var element : array) {
+                    writer.write(element.toString());
+                    writer.write(" "); // Separate elements with a space
+                }
             }
         } catch (IOException e) {
             e.printStackTrace(); // Handle the exception appropriately in your application
+        }
+    }
+
+    /**
+     * Helper class that tracks whether the process can be active based on certain conditions.
+     */
+    private static class MayTheProcessBeActive {
+        /**
+         * Indicates whether the number of elements is within a valid range.
+         */
+        public boolean numberOfElements;
+
+        /**
+         * Indicates the state of the lab variant.
+         */
+        public boolean labVariant;
+
+        /**
+         * Initializes a new instance of the MayTheProcessBeActive class with the provided values.
+         *
+         * @param numberOfElements Indicates whether the number of elements is within a valid range.
+         * @param labVariant       Indicates the state of the lab variant.
+         */
+        MayTheProcessBeActive(boolean numberOfElements, boolean labVariant) {
+            this.numberOfElements = numberOfElements;
+            this.labVariant = labVariant;
+        }
+
+        /**
+         * Checks whether the process can be enabled based on the current conditions.
+         *
+         * @return True if the process can be enabled, false otherwise.
+         */
+        public boolean canBeEnabled() {
+            // The process can be enabled only if both numberOfElements and labVariant are true.
+            return numberOfElements && labVariant;
         }
     }
 }

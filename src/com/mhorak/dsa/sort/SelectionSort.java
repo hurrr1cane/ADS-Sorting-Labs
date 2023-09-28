@@ -6,20 +6,13 @@ import java.util.Arrays;
 
 /**
  * A class that implements the Selection Sort algorithm for sorting an array of comparable elements.
- *
- * @param <T> The type of elements in the array, which must implement the Comparable interface.
  */
-public class SelectionSort<T extends Comparable<T>> extends Sort<T> {
+public class SelectionSort extends Sort {
 
     /**
      * Constructs a SelectionSort instance with the given array of numbers.
-     *
-     * @param arrayOfNumbers The array of numbers to be sorted.
      */
-    public SelectionSort(T[] arrayOfNumbers) {
-        this.countOfNumbers = arrayOfNumbers.length;
-        this.arrayOfNumbers = arrayOfNumbers;
-
+    public SelectionSort() {
         startOfSorting = LocalTime.now();
         endOfSorting = LocalTime.now();
     }
@@ -27,17 +20,41 @@ public class SelectionSort<T extends Comparable<T>> extends Sort<T> {
     /**
      * Sorts the array with steps and returns a list of intermediate sorting states.
      *
+     * @param arrayOfNumbers The array of Integer elements to be sorted.
      * @return An ArrayList of arrays representing intermediate sorting states.
      */
     @Override
-    public ArrayList<T[]> sortWithSteps() {
-        ArrayList<T[]> steps = new ArrayList<>();
+    public ArrayList<Integer[]> sortLabWithSteps(Integer[] arrayOfNumbers) {
+        ArrayList<Integer[]> steps = new ArrayList<>();
 
         startOfSorting = LocalTime.now();
 
-        for (int i = 0; i < countOfNumbers; i++) {
-            int indexOfLowest = findMin(i);
-            swap(i, indexOfLowest);
+        for (int i = 0; i < arrayOfNumbers.length; i++) {
+            int indexOfLowest = findMin(i, arrayOfNumbers);
+            swap(i, indexOfLowest, arrayOfNumbers);
+
+            steps.add(Arrays.copyOf(arrayOfNumbers, arrayOfNumbers.length));
+        }
+
+        endOfSorting = LocalTime.now();
+
+        return steps;
+    }
+
+    /**
+     * Sorts the array with steps and returns a list of intermediate sorting states.
+     *
+     * @param arrayOfNumbers The array of Double elements to be sorted.
+     * @return An ArrayList of arrays representing intermediate sorting states.
+     */
+    public ArrayList<Double[]> sortIndividualWithSteps(Double[] arrayOfNumbers) {
+        ArrayList<Double[]> steps = new ArrayList<>();
+
+        startOfSorting = LocalTime.now();
+
+        for (int i = 0; i < arrayOfNumbers.length; i++) {
+            int indexOfLowest = findMin(i, arrayOfNumbers);
+            swap(i, indexOfLowest, arrayOfNumbers);
 
             steps.add(Arrays.copyOf(arrayOfNumbers, arrayOfNumbers.length));
         }
@@ -50,15 +67,16 @@ public class SelectionSort<T extends Comparable<T>> extends Sort<T> {
     /**
      * Sorts the array in-place and returns the sorted array.
      *
+     * @param arrayOfNumbers The array of Integer elements to be sorted.
      * @return The sorted array.
      */
     @Override
-    public T[] sort() {
+    public Integer[] sortLab(Integer[] arrayOfNumbers) {
         startOfSorting = LocalTime.now();
 
-        for (int i = 0; i < countOfNumbers; i++) {
-            int indexOfLowest = findMin(i);
-            swap(i, indexOfLowest);
+        for (int i = 0; i < arrayOfNumbers.length; i++) {
+            int indexOfLowest = findMin(i, arrayOfNumbers);
+            swap(i, indexOfLowest, arrayOfNumbers);
         }
 
         endOfSorting = LocalTime.now();
@@ -67,13 +85,43 @@ public class SelectionSort<T extends Comparable<T>> extends Sort<T> {
     }
 
     /**
+     * Sorts the array in-place and returns the sorted array.
+     *
+     * @param arrayOfNumbers The array of Double elements to be sorted.
+     * @return The sorted array.
+     */
+    public Double[] sortIndividual(Double[] arrayOfNumbers) {
+        startOfSorting = LocalTime.now();
+
+        for (int i = 0; i < arrayOfNumbers.length; i++) {
+            int indexOfLowest = findMin(i, arrayOfNumbers);
+            swap(i, indexOfLowest, arrayOfNumbers);
+        }
+
+        endOfSorting = LocalTime.now();
+
+        return arrayOfNumbers;
+    }
+
+    /**
+     * This method is not implemented for Double[][] arrays.
+     *
+     * @param arrayOfNumbers The two-dimensional array of Double elements.
+     * @return An empty two-dimensional array (not implemented).
+     */
+    @Override
+    public Double[][] sortIndividual(Double[][] arrayOfNumbers) {
+        return new Double[0][];
+    }
+
+    /**
      * Swaps two elements in the array.
      *
      * @param index1 The index of the first element to be swapped.
      * @param index2 The index of the second element to be swapped.
      */
-    private void swap(int index1, int index2) {
-        T temp = arrayOfNumbers[index1];
+    private void swap(int index1, int index2, Comparable[] arrayOfNumbers) {
+        Comparable temp = arrayOfNumbers[index1];
 
         arrayOfNumbers[index1] = arrayOfNumbers[index2];
         arrayOfNumbers[index2] = temp;
@@ -85,11 +133,11 @@ public class SelectionSort<T extends Comparable<T>> extends Sort<T> {
      * @param from The starting index for finding the minimum element.
      * @return The index of the minimum element.
      */
-    private int findMin(int from) {
-        T lowest = arrayOfNumbers[from];
+    private int findMin(int from, Comparable[] arrayOfNumbers) {
+        Comparable lowest = arrayOfNumbers[from];
         int indexOfLowest = from;
 
-        for (int i = from + 1; i < countOfNumbers; i++) {
+        for (int i = from + 1; i < arrayOfNumbers.length; i++) {
             if (arrayOfNumbers[i].compareTo(lowest) < 0) {
                 lowest = arrayOfNumbers[i];
                 indexOfLowest = i;
