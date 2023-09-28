@@ -62,34 +62,53 @@ public class ShellSort extends Sort {
     }
 
     /**
-     * Sorts a two-dimensional array of Double elements using the Shell Sort algorithm.
+     * Sorts a two-dimensional array of Double elements by the first elements of columns using the Shell Sort algorithm.
      *
      * @param arrayOfNumbers The two-dimensional array of Double elements to be sorted.
      * @return A sorted two-dimensional array of Doubles.
      */
     public Double[][] sortIndividual(Double[][] arrayOfNumbers) {
         startOfSorting = LocalTime.now();
+        int rows = arrayOfNumbers.length;
+        int cols = arrayOfNumbers[0].length;
 
-        int step = arrayOfNumbers.length / 2;
+        // Transpose the array
+        Double[][] transposedArray = new Double[cols][rows];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                transposedArray[j][i] = arrayOfNumbers[i][j];
+            }
+        }
 
+        int step = transposedArray.length / 2;
+        // Sort each row (which is equivalent to sorting by columns in the original array)
         while (step > 0) {
-            for (int j = step; j < arrayOfNumbers.length; j++) {
-                Double[] temp = arrayOfNumbers[j];
+            for (int j = step; j < transposedArray.length; j++) {
+                Double[] temp = transposedArray[j];
                 int current = j - step;
-                while (current >= 0 && temp[0] < arrayOfNumbers[current][0]) {
-                    arrayOfNumbers[current + step] = arrayOfNumbers[current];
+                while (current >= 0 && temp[0] < transposedArray[current][0]) {
+                    transposedArray[current + step] = transposedArray[current];
                     current -= step;
                 }
-                arrayOfNumbers[current + step] = temp;
+                transposedArray[current + step] = temp;
             }
 
             step /= 2;
+        }
+
+        // Transpose the sorted array back to its original form
+        for (int i = 0; i < cols; i++) {
+            for (int j = 0; j < rows; j++) {
+                arrayOfNumbers[j][i] = transposedArray[i][j];
+            }
         }
 
         endOfSorting = LocalTime.now();
 
         return arrayOfNumbers;
     }
+
+
 
     /**
      * Sorts a two-dimensional array of Double elements using the Shell Sort algorithm.
