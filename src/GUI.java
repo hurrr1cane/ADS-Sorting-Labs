@@ -1,3 +1,4 @@
+import com.mhorak.dsa.sort.QuickSort;
 import com.mhorak.dsa.sort.SelectionSort;
 import com.mhorak.dsa.sort.ShellSort;
 import com.mhorak.dsa.sort.Sort;
@@ -143,6 +144,8 @@ public class GUI {
                         arrayOfNumbers = generateAndDisplayArray(inputField, matrixArea, 1, taskPanel.hugeNumbersRadioButton().isSelected());
                     } else if (sortingMethods.shellSort.isSelected()) {
                         arrayOfNumbers = generateAndDisplayArray(inputField, matrixArea, 2, taskPanel.hugeNumbersRadioButton().isSelected());
+                    } else if (sortingMethods.quickSort.isSelected()) {
+                        arrayOfNumbers = generateAndDisplayArray(inputField, matrixArea, 3, taskPanel.hugeNumbersRadioButton().isSelected());
                     }
                 }
             } catch (Exception exception) {
@@ -173,7 +176,7 @@ public class GUI {
                     targetArray = new Integer[input];
                     Arrays.fill(targetArray, 0);
                 }
-                case 1 -> {
+                case 1, 3 -> {
                     targetArray = new Double[input];
                     Arrays.fill(targetArray, 0.0);
                 }
@@ -224,16 +227,12 @@ public class GUI {
                 Tools.mutateArray((Double[]) targetArray);
 
                 //Printing new array so the function is visible
-                if (targetArray.length <= 15) {
-                    matrixArea.append("\n");
-                    for (int i = 0; i < targetArray.length; i++) {
-                        if (targetArray[i] instanceof Double) {
-                            matrixArea.append(decimalFormat.format(targetArray[i]) + " ");
-                        } else {
-                            matrixArea.append(targetArray[i] + " ");
-                        }
-                    }
-                }
+                printMutatedArray(matrixArea, targetArray);
+            }
+            if (labNumber == 3) {
+                targetArray = Tools.removeMode((Double[]) targetArray);
+                //Printing new array so the function is visible
+                printMutatedArray(matrixArea, targetArray);
             }
 
             writeArrayToFile(targetArray, filePath, true);
@@ -241,6 +240,26 @@ public class GUI {
             return targetArray;
         } catch (Exception exception) {
             return null;
+        }
+    }
+
+    /**
+     * Appends the elements of the target array to the provided JTextArea for displaying mutated arrays.
+     * If the length of the target array is 15 or less, it formats and appends the elements to the JTextArea.
+     *
+     * @param matrixArea   The JTextArea where the mutated array will be displayed.
+     * @param targetArray  The array whose elements will be displayed in the JTextArea.
+     */
+    private void printMutatedArray(JTextArea matrixArea, Object[] targetArray) {
+        if (targetArray.length <= 15) {
+            matrixArea.append("\n");
+            for (int i = 0; i < targetArray.length; i++) {
+                if (targetArray[i] instanceof Double) {
+                    matrixArea.append(decimalFormat.format(targetArray[i]) + " ");
+                } else {
+                    matrixArea.append(targetArray[i] + " ");
+                }
+            }
         }
     }
 
@@ -292,6 +311,8 @@ public class GUI {
             sortingAlgorithm = new SelectionSort();
         } else if (sortingMethods.shellSort().isSelected()) {
             sortingAlgorithm = new ShellSort();
+        } else if (sortingMethods.quickSort().isSelected()) {
+            sortingAlgorithm = new QuickSort();
         }
 
         // Sort the array based on the selected sorting method
@@ -299,6 +320,8 @@ public class GUI {
             arrayOfNumbers = sortingAlgorithm.sortIndividual((Double[]) arrayOfNumbers);
         } else if (sortingMethods.shellSort().isSelected()) {
             arrayOfNumbers = sortingAlgorithm.sortIndividual((Double[][]) arrayOfNumbers);
+        } else if (sortingMethods.quickSort().isSelected()) {
+            arrayOfNumbers = sortingAlgorithm.sortIndividual((Double[]) arrayOfNumbers);
         }
 
         // Display the sorted array in the matrixArea
@@ -324,6 +347,8 @@ public class GUI {
             sortingAlgorithm = new SelectionSort();
         } else if (sortingMethods.shellSort().isSelected()) {
             sortingAlgorithm = new ShellSort();
+        } else if (sortingMethods.quickSort().isSelected()) {
+            sortingAlgorithm = new QuickSort();
         }
 
         if (showProcessCheckBox.isSelected()) {
@@ -411,11 +436,16 @@ public class GUI {
         JRadioButton shellSort = new JRadioButton("Shell");
         radioButtonGroup.add(shellSort); // Add to the group
 
+        // Create the third radio button
+        JRadioButton quickSort = new JRadioButton("Quick");
+        radioButtonGroup.add(quickSort); // Add to the group
+
         // Create a panel for the radio buttons
         JPanel radioButtonPanel = new JPanel();
         radioButtonPanel.setLayout(new FlowLayout());
         radioButtonPanel.add(selectionSort);
         radioButtonPanel.add(shellSort);
+        radioButtonPanel.add(quickSort);
 
         // Add the radio button panel to the main panel
         gbc.gridx = 0;
@@ -424,17 +454,18 @@ public class GUI {
         mainPanel.add(radioButtonPanel, gbc);
 
         // Create and return a SortingMethods object encapsulating the radio buttons
-        SortingMethods sortingMethods = new SortingMethods(selectionSort, shellSort);
+        SortingMethods sortingMethods = new SortingMethods(selectionSort, shellSort, quickSort);
         return sortingMethods;
     }
 
     /**
-     * A record that represents a pair of sorting method radio buttons.
+     * A record that represents a set of sorting method radio buttons.
      *
      * @param selectionSort The radio button for the Selection Sort method.
      * @param shellSort     The radio button for the Shell Sort method.
+     * @param quickSort     The radio button for the Quick Sort method.
      */
-    private record SortingMethods(JRadioButton selectionSort, JRadioButton shellSort) {
+    private record SortingMethods(JRadioButton selectionSort, JRadioButton shellSort, JRadioButton quickSort) {
     }
 
     /**

@@ -1,7 +1,7 @@
 package com.mhorak.dsa.tools;
 
 import java.text.DecimalFormat;
-import java.util.Random;
+import java.util.*;
 
 /**
  * A utility class for various operations on arrays.
@@ -77,4 +77,47 @@ public class Tools {
     private static void applyFunction(Double[] arrayOfNumbers, int i) {
         arrayOfNumbers[i] = Math.sqrt(Math.abs(arrayOfNumbers[i] - 10.));
     }
+
+    /**
+     * Removes elements that belong to the mode (most frequently occurring whole parts)
+     * from a Double array and returns a modified array without those elements.
+     *
+     * @param inputArray The input array of Double values.
+     * @return A Double array with mode elements removed.
+     */
+    public static Double[] removeMode(Double[] inputArray) {
+        // Create a HashMap to store the frequency of each whole part
+        Map<Long, Integer> frequencyMap = new HashMap<>();
+
+        // Find the maximum frequency (mode)
+        int maxFrequency = 0;
+        for (double num : inputArray) {
+            long wholePart = (long) num; // Get the whole part of the double
+            frequencyMap.put(wholePart, frequencyMap.getOrDefault(wholePart, 0) + 1);
+            maxFrequency = Math.max(maxFrequency, frequencyMap.get(wholePart));
+        }
+
+        // If there is no mode (maxFrequency is 1), return the same array
+        if (maxFrequency == 1) {
+            return inputArray;
+        }
+
+        // Create a list to store elements that are not part of the mode
+        List<Double> result = new ArrayList<>();
+        for (double num : inputArray) {
+            long wholePart = (long) num;
+            if (frequencyMap.get(wholePart) != maxFrequency) {
+                result.add(num);
+            }
+        }
+
+        // Convert the list to an array
+        Double[] resultArray = new Double[result.size()];
+        for (int i = 0; i < result.size(); i++) {
+            resultArray[i] = result.get(i);
+        }
+
+        return resultArray;
+    }
+
 }
