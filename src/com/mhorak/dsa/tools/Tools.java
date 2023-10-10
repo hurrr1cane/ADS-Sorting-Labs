@@ -13,27 +13,50 @@ public class Tools {
     public static final DecimalFormat decimalFormat = new DecimalFormat("0.00"); // Pattern for two digits after the decimal point
 
     /**
-     * Checks if an array is sorted in ascending order.
+     * Checks if an array is sorted in the specified order (ascending or descending).
      *
      * @param arrayOfNumbers The array to check for sorting.
-     * @return True if the array is sorted in ascending order, otherwise false.
+     * @param byAscending    A boolean flag indicating whether to check for ascending order (true) or descending order (false).
+     * @return True if the array is sorted in the specified order, otherwise false.
      */
-    public static boolean isArraySorted(Object[] arrayOfNumbers) {
-        for (int i = 1; i < arrayOfNumbers.length; i++) {
-            if (arrayOfNumbers[0] instanceof Double[]) {
-                Double[][] newArray = (Double[][]) arrayOfNumbers;
-                if (newArray[i - 1][0].compareTo(newArray[i][0]) > 0) {
-                    return false;
+    public static boolean isArraySorted(Object[] arrayOfNumbers, boolean byAscending) {
+        if (byAscending) {
+            // Check for ascending order
+            for (int i = 1; i < arrayOfNumbers.length; i++) {
+                if (arrayOfNumbers[0] instanceof Double[]) {
+                    Double[][] newArray = (Double[][]) arrayOfNumbers;
+                    // Check for ascending order within a row of the two-dimensional array
+                    if (newArray[0][i - 1].compareTo(newArray[0][i]) > 0) {
+                        return false;
+                    }
+                } else {
+                    Comparable[] newArray = (Comparable[]) arrayOfNumbers;
+                    // Check for ascending order within a one-dimensional array
+                    if (newArray[i - 1].compareTo(newArray[i]) > 0) {
+                        return false;
+                    }
                 }
             }
-            else {
-                Comparable[] newArray = (Comparable[]) arrayOfNumbers;
-                if (newArray[i - 1].compareTo(newArray[i]) > 0) {
-                    return false;
+            return true;
+        } else {
+            // Check for descending order
+            for (int i = 1; i < arrayOfNumbers.length; i++) {
+                if (arrayOfNumbers[0] instanceof Double[]) {
+                    Double[][] newArray = (Double[][]) arrayOfNumbers;
+                    // Check for descending order within a row of the two-dimensional array
+                    if (newArray[0][i - 1].compareTo(newArray[0][i]) < 0) {
+                        return false;
+                    }
+                } else {
+                    Comparable[] newArray = (Comparable[]) arrayOfNumbers;
+                    // Check for descending order within a one-dimensional array
+                    if (newArray[i - 1].compareTo(newArray[i]) < 0) {
+                        return false;
+                    }
                 }
             }
+            return true;
         }
-        return true;
     }
 
     /**
@@ -46,8 +69,8 @@ public class Tools {
      */
     public static void initializeArray(Object[] arrayOfNumbers, boolean useHugeNumbers) {
         Random rand = new Random();
-        int min = useHugeNumbers ? Integer.MIN_VALUE : 0;
-        int max = useHugeNumbers ? Integer.MAX_VALUE : 100; // Use a smaller range for huge numbers
+        int min = useHugeNumbers ? Integer.MIN_VALUE : -50;
+        int max = useHugeNumbers ? Integer.MAX_VALUE : 50; // Use a smaller range for huge numbers
 
         for (int i = 0; i < arrayOfNumbers.length; i++) {
             if (arrayOfNumbers[i] instanceof Integer) {
@@ -61,21 +84,42 @@ public class Tools {
     }
 
     /**
-     * Mutates an array of Double values by applying a square root function to even-indexed elements.
+     * Mutates an array of Double values by applying specific functions based on the lab variant.
      *
      * @param arrayOfNumbers The array of Double values to mutate.
+     * @param lab            The lab variant, which determines the mutation function to apply.
      */
-    public static void mutateArray(Double[] arrayOfNumbers) {
+    public static void mutateArray(Double[] arrayOfNumbers, int lab) {
         for (int i = 0; i < arrayOfNumbers.length; i++) {
-            if (i % 2 == 0) {
-                applyFunction(arrayOfNumbers, i);
+            if (i % 2 == 0 && lab == 1) {
+                // Apply the function for lab variant 1 to even-indexed elements
+                applyFunctionLab1(arrayOfNumbers, i);
+            }
+            if (arrayOfNumbers[i] < 0 && lab == 4) {
+                // Apply the function for lab variant 4 to elements less than 0
+                applyFunctionLab2(arrayOfNumbers, i);
             }
         }
     }
 
-    // Private helper method to apply a square root function to an element at the given index.
-    private static void applyFunction(Double[] arrayOfNumbers, int i) {
+    /**
+     * Applies a square root function to an element at the given index and stores the result.
+     *
+     * @param arrayOfNumbers The array of Double values to mutate.
+     * @param i              The index of the element to be mutated.
+     */
+    private static void applyFunctionLab1(Double[] arrayOfNumbers, int i) {
         arrayOfNumbers[i] = Math.sqrt(Math.abs(arrayOfNumbers[i] - 10.));
+    }
+
+    /**
+     * Applies a sine function to an element at the given index and stores the result.
+     *
+     * @param arrayOfNumbers The array of Double values to mutate.
+     * @param i              The index of the element to be mutated.
+     */
+    private static void applyFunctionLab2(Double[] arrayOfNumbers, int i) {
+        arrayOfNumbers[i] = Math.sin(arrayOfNumbers[i]);
     }
 
     /**
@@ -97,9 +141,11 @@ public class Tools {
             maxFrequency = Math.max(maxFrequency, frequencyMap.get(wholePart));
         }
 
-        // If there is no mode (maxFrequency is 1), return the same array
+        // If there is no mode (maxFrequency is 1), remove first element
         if (maxFrequency == 1) {
-            return inputArray;
+            Double[] resultArray = new Double[inputArray.length - 1];
+            System.arraycopy(inputArray, 1, resultArray, 0, resultArray.length);
+            return resultArray;
         }
 
         // Create a list to store elements that are not part of the mode
@@ -119,5 +165,6 @@ public class Tools {
 
         return resultArray;
     }
+
 
 }

@@ -1,7 +1,4 @@
-import com.mhorak.dsa.sort.QuickSort;
-import com.mhorak.dsa.sort.SelectionSort;
-import com.mhorak.dsa.sort.ShellSort;
-import com.mhorak.dsa.sort.Sort;
+import com.mhorak.dsa.sort.*;
 import com.mhorak.dsa.tools.Tools;
 
 import javax.swing.*;
@@ -74,7 +71,7 @@ public class GUI {
         initializeSortButton(gbc, mainPanel, taskPanel, sortingMethods, timer, matrixArea, showProcessCheckBox);
 
         // Initialize the "Sorted?" button for checking if the array is sorted
-        initializeSortedButton(gbc, mainPanel);
+        initializeSortedButton(gbc, mainPanel, taskPanel, sortingMethods);
 
         // Add the main panel to the frame
         frame.add(mainPanel);
@@ -86,12 +83,15 @@ public class GUI {
 
     /**
      * Initializes and configures the "Sorted?" button with its action listener.
-     * This button allows the user to check if the array is sorted.
+     * This button allows the user to check if the array is sorted and displays a message popup
+     * based on the sorting status.
      *
-     * @param gbc       The GridBagConstraints for specifying the button's layout.
-     * @param mainPanel The main panel where the button will be added.
+     * @param gbc            The GridBagConstraints for specifying the button's layout.
+     * @param mainPanel      The main panel where the button will be added.
+     * @param taskPanel      The task panel containing user task options and settings.
+     * @param sortingMethods An instance of SortingMethods that provides sorting method selection.
      */
-    private void initializeSortedButton(GridBagConstraints gbc, JPanel mainPanel) {
+    private void initializeSortedButton(GridBagConstraints gbc, JPanel mainPanel, TaskPanel taskPanel, SortingMethods sortingMethods) {
         JButton sortedButton = new JButton("Sorted?");
         gbc.gridx = 2;
         gbc.gridy = 3;
@@ -100,9 +100,10 @@ public class GUI {
 
         sortedButton.addActionListener(e -> {
             try {
+
                 boolean isSorted;
                 // Check if the array is sorted
-                isSorted = Tools.isArraySorted(arrayOfNumbers);
+                isSorted = Tools.isArraySorted(arrayOfNumbers, !(taskPanel.individualRadioButton.isSelected() && sortingMethods.mergeSort.isSelected()));
 
                 // Display a message popup based on whether the array is sorted or not
                 if (isSorted) {
@@ -146,6 +147,8 @@ public class GUI {
                         arrayOfNumbers = generateAndDisplayArray(inputField, matrixArea, 2, taskPanel.hugeNumbersRadioButton().isSelected());
                     } else if (sortingMethods.quickSort.isSelected()) {
                         arrayOfNumbers = generateAndDisplayArray(inputField, matrixArea, 3, taskPanel.hugeNumbersRadioButton().isSelected());
+                    } else if (sortingMethods.mergeSort.isSelected()) {
+                        arrayOfNumbers = generateAndDisplayArray(inputField, matrixArea, 4, taskPanel.hugeNumbersRadioButton().isSelected());
                     }
                 }
             } catch (Exception exception) {
@@ -176,7 +179,7 @@ public class GUI {
                     targetArray = new Integer[input];
                     Arrays.fill(targetArray, 0);
                 }
-                case 1, 3 -> {
+                case 1, 3, 4 -> {
                     targetArray = new Double[input];
                     Arrays.fill(targetArray, 0.0);
                 }
@@ -223,8 +226,8 @@ public class GUI {
             /*
              * Applying an individual variant function
              */
-            if (labNumber == 1) {
-                Tools.mutateArray((Double[]) targetArray);
+            if (labNumber == 1 || labNumber == 4) {
+                Tools.mutateArray((Double[]) targetArray, labNumber);
 
                 //Printing new array so the function is visible
                 printMutatedArray(matrixArea, targetArray);
@@ -247,8 +250,8 @@ public class GUI {
      * Appends the elements of the target array to the provided JTextArea for displaying mutated arrays.
      * If the length of the target array is 15 or less, it formats and appends the elements to the JTextArea.
      *
-     * @param matrixArea   The JTextArea where the mutated array will be displayed.
-     * @param targetArray  The array whose elements will be displayed in the JTextArea.
+     * @param matrixArea  The JTextArea where the mutated array will be displayed.
+     * @param targetArray The array whose elements will be displayed in the JTextArea.
      */
     private void printMutatedArray(JTextArea matrixArea, Object[] targetArray) {
         if (targetArray.length <= 15) {
@@ -313,6 +316,8 @@ public class GUI {
             sortingAlgorithm = new ShellSort();
         } else if (sortingMethods.quickSort().isSelected()) {
             sortingAlgorithm = new QuickSort();
+        } else if (sortingMethods.mergeSort().isSelected()) {
+            sortingAlgorithm = new MergeSort();
         }
 
         // Sort the array based on the selected sorting method
@@ -321,6 +326,8 @@ public class GUI {
         } else if (sortingMethods.shellSort().isSelected()) {
             arrayOfNumbers = sortingAlgorithm.sortIndividual((Double[][]) arrayOfNumbers);
         } else if (sortingMethods.quickSort().isSelected()) {
+            arrayOfNumbers = sortingAlgorithm.sortIndividual((Double[]) arrayOfNumbers);
+        } else if (sortingMethods.mergeSort().isSelected()) {
             arrayOfNumbers = sortingAlgorithm.sortIndividual((Double[]) arrayOfNumbers);
         }
 
@@ -349,6 +356,8 @@ public class GUI {
             sortingAlgorithm = new ShellSort();
         } else if (sortingMethods.quickSort().isSelected()) {
             sortingAlgorithm = new QuickSort();
+        } else if (sortingMethods.mergeSort().isSelected()) {
+            sortingAlgorithm = new MergeSort();
         }
 
         if (showProcessCheckBox.isSelected()) {
@@ -428,9 +437,8 @@ public class GUI {
 
         // Create the first radio button
         JRadioButton selectionSort = new JRadioButton("Selection");
-
-        selectionSort.setSelected(true);
         radioButtonGroup.add(selectionSort); // Add to the group
+        selectionSort.setSelected(true);
 
         // Create the second radio button
         JRadioButton shellSort = new JRadioButton("Shell");
@@ -440,12 +448,17 @@ public class GUI {
         JRadioButton quickSort = new JRadioButton("Quick");
         radioButtonGroup.add(quickSort); // Add to the group
 
+        // Create the forth radio button
+        JRadioButton mergeSort = new JRadioButton("Merge");
+        radioButtonGroup.add(mergeSort); // Add to the group
+
         // Create a panel for the radio buttons
         JPanel radioButtonPanel = new JPanel();
         radioButtonPanel.setLayout(new FlowLayout());
         radioButtonPanel.add(selectionSort);
         radioButtonPanel.add(shellSort);
         radioButtonPanel.add(quickSort);
+        radioButtonPanel.add(mergeSort);
 
         // Add the radio button panel to the main panel
         gbc.gridx = 0;
@@ -454,7 +467,7 @@ public class GUI {
         mainPanel.add(radioButtonPanel, gbc);
 
         // Create and return a SortingMethods object encapsulating the radio buttons
-        SortingMethods sortingMethods = new SortingMethods(selectionSort, shellSort, quickSort);
+        SortingMethods sortingMethods = new SortingMethods(selectionSort, shellSort, quickSort, mergeSort);
         return sortingMethods;
     }
 
@@ -464,8 +477,10 @@ public class GUI {
      * @param selectionSort The radio button for the Selection Sort method.
      * @param shellSort     The radio button for the Shell Sort method.
      * @param quickSort     The radio button for the Quick Sort method.
+     * @param mergeSort     The radio button for the Merge Sort method.
      */
-    private record SortingMethods(JRadioButton selectionSort, JRadioButton shellSort, JRadioButton quickSort) {
+    private record SortingMethods(JRadioButton selectionSort, JRadioButton shellSort, JRadioButton quickSort,
+                                  JRadioButton mergeSort) {
     }
 
     /**
