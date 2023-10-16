@@ -149,6 +149,8 @@ public class GUI {
                         arrayOfNumbers = generateAndDisplayArray(inputField, matrixArea, 3, taskPanel.hugeNumbersRadioButton().isSelected());
                     } else if (sortingMethods.mergeSort.isSelected()) {
                         arrayOfNumbers = generateAndDisplayArray(inputField, matrixArea, 4, taskPanel.hugeNumbersRadioButton().isSelected());
+                    } else if (sortingMethods.countingSort.isSelected()) {
+                        arrayOfNumbers = generateAndDisplayArray(inputField, matrixArea, 5, taskPanel.hugeNumbersRadioButton().isSelected());
                     }
                 }
             } catch (Exception exception) {
@@ -183,7 +185,7 @@ public class GUI {
                     targetArray = new Double[input];
                     Arrays.fill(targetArray, 0.0);
                 }
-                case 2 -> {
+                case 2, 5 -> {
                     targetArray = new Double[input][input];
                     for (Object row : targetArray) {
                         Arrays.fill((Double[]) row, 0.0);
@@ -237,6 +239,11 @@ public class GUI {
                 //Printing new array so the function is visible
                 printMutatedArray(matrixArea, targetArray);
             }
+            if (labNumber == 5) {
+                Tools.mutateArray((Double[][]) targetArray, labNumber);
+                //Printing new array so the function is visible
+                printMutatedArray(matrixArea, targetArray);
+            }
 
             writeArrayToFile(targetArray, filePath, true);
 
@@ -259,8 +266,14 @@ public class GUI {
             for (int i = 0; i < targetArray.length; i++) {
                 if (targetArray[i] instanceof Double) {
                     matrixArea.append(decimalFormat.format(targetArray[i]) + " ");
-                } else {
+                } else if (targetArray[i] instanceof Integer) {
                     matrixArea.append(targetArray[i] + " ");
+                } else if (targetArray[i] instanceof Double[]) {
+                    Double[] row = (Double[]) targetArray[i];
+                    for (int j = 0; j < row.length; j++) {
+                        matrixArea.append(decimalFormat.format(row[j]) + " ");
+                    }
+                    matrixArea.append("\n");
                 }
             }
         }
@@ -318,6 +331,8 @@ public class GUI {
             sortingAlgorithm = new QuickSort();
         } else if (sortingMethods.mergeSort().isSelected()) {
             sortingAlgorithm = new MergeSort();
+        } else if (sortingMethods.countingSort().isSelected()) {
+            sortingAlgorithm = new CountingSort();
         }
 
         // Sort the array based on the selected sorting method
@@ -329,6 +344,8 @@ public class GUI {
             arrayOfNumbers = sortingAlgorithm.sortIndividual((Double[]) arrayOfNumbers);
         } else if (sortingMethods.mergeSort().isSelected()) {
             arrayOfNumbers = sortingAlgorithm.sortIndividual((Double[]) arrayOfNumbers);
+        } else if (sortingMethods.countingSort().isSelected()) {
+            arrayOfNumbers = sortingAlgorithm.sortIndividual((Double[][]) arrayOfNumbers);
         }
 
         // Display the sorted array in the matrixArea
@@ -358,6 +375,8 @@ public class GUI {
             sortingAlgorithm = new QuickSort();
         } else if (sortingMethods.mergeSort().isSelected()) {
             sortingAlgorithm = new MergeSort();
+        } else if (sortingMethods.countingSort().isSelected()) {
+            sortingAlgorithm = new CountingSort();
         }
 
         if (showProcessCheckBox.isSelected()) {
@@ -452,6 +471,10 @@ public class GUI {
         JRadioButton mergeSort = new JRadioButton("Merge");
         radioButtonGroup.add(mergeSort); // Add to the group
 
+        // Create the fifth radio button
+        JRadioButton countingSort = new JRadioButton("Counting");
+        radioButtonGroup.add(countingSort); // Add to the group
+
         // Create a panel for the radio buttons
         JPanel radioButtonPanel = new JPanel();
         radioButtonPanel.setLayout(new FlowLayout());
@@ -459,6 +482,7 @@ public class GUI {
         radioButtonPanel.add(shellSort);
         radioButtonPanel.add(quickSort);
         radioButtonPanel.add(mergeSort);
+        radioButtonPanel.add(countingSort);
 
         // Add the radio button panel to the main panel
         gbc.gridx = 0;
@@ -467,7 +491,7 @@ public class GUI {
         mainPanel.add(radioButtonPanel, gbc);
 
         // Create and return a SortingMethods object encapsulating the radio buttons
-        SortingMethods sortingMethods = new SortingMethods(selectionSort, shellSort, quickSort, mergeSort);
+        SortingMethods sortingMethods = new SortingMethods(selectionSort, shellSort, quickSort, mergeSort, countingSort);
         return sortingMethods;
     }
 
@@ -478,9 +502,10 @@ public class GUI {
      * @param shellSort     The radio button for the Shell Sort method.
      * @param quickSort     The radio button for the Quick Sort method.
      * @param mergeSort     The radio button for the Merge Sort method.
+     * @param countingSort  The radio button for the Counting Sort method.
      */
     private record SortingMethods(JRadioButton selectionSort, JRadioButton shellSort, JRadioButton quickSort,
-                                  JRadioButton mergeSort) {
+                                  JRadioButton mergeSort, JRadioButton countingSort) {
     }
 
     /**

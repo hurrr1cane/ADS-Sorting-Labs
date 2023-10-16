@@ -103,6 +103,24 @@ public class Tools {
     }
 
     /**
+     * Mutates an array of Double values by applying specific functions based on the lab variant.
+     *
+     * @param arrayOfNumbers The array of Double values to mutate.
+     * @param lab            The lab variant, which determines the mutation function to apply.
+     */
+    public static void mutateArray(Double[][] arrayOfNumbers, int lab) {
+        for (int i = 0; i < arrayOfNumbers.length; i++) {
+            int minJ = 0;
+            for (int j = 0; j < arrayOfNumbers[i].length; j++) {
+                if (arrayOfNumbers[i][j] < arrayOfNumbers[i][minJ]) {
+                    minJ = j;
+                }
+            }
+            applyFunctionLab3(arrayOfNumbers, i, minJ);
+        }
+    }
+
+    /**
      * Applies a square root function to an element at the given index and stores the result.
      *
      * @param arrayOfNumbers The array of Double values to mutate.
@@ -120,6 +138,13 @@ public class Tools {
      */
     private static void applyFunctionLab2(Double[] arrayOfNumbers, int i) {
         arrayOfNumbers[i] = Math.sin(arrayOfNumbers[i]);
+    }
+
+    /**
+     *
+     */
+    private static void applyFunctionLab3(Double[][] arrayOfNumbers, int i, int j) {
+        arrayOfNumbers[i][j] = Math.log(Math.abs(arrayOfNumbers[i][j]));
     }
 
     /**
