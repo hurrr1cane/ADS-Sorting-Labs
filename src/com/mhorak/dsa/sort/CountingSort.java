@@ -124,26 +124,15 @@ public class CountingSort extends Sort{
             frequencies[arrayOfNumbers[i] - min]++;
         }
 
-        // Calculate the cumulative frequencies
-        int currentSum = frequencies[0];
-        for (int i = 1; i < frequencies.length; i++) {
-            currentSum += frequencies[i];
-            frequencies[i] = currentSum;
-        }
-
-        // Adjust frequencies to determine the final positions of values in the sorted array
-        for (int i = frequencies.length - 1; i > 0; i--) {
-            frequencies[i] = frequencies[i - 1];
-        }
-        frequencies[0] = 0;
-
         // Create the sorted array
         Integer[] sorted = new Integer[arrayOfNumbers.length];
 
-        // Populate the sorted array by placing values in their final positions
-        for (int i = 0; i < arrayOfNumbers.length; i++) {
-            sorted[frequencies[arrayOfNumbers[i] - min]] = arrayOfNumbers[i];
-            frequencies[arrayOfNumbers[i] - min]++;
+        int j = 0;
+        for (int i = 0; i < frequencies.length; i++) {
+            for (int k = 0; k < frequencies[i]; k++) {
+                sorted[j] = i + min;
+                j++;
+            }
         }
 
         endOfSorting = LocalTime.now();
@@ -182,52 +171,26 @@ public class CountingSort extends Sort{
         int length = max - min;
 
         // Initialize an array to store the frequencies of each value
-        int[] frequencies = new int[length + 1];
+        Integer[] frequencies = new Integer[length + 1];
+        Arrays.fill(frequencies, 0);
 
         // Calculate the frequencies of each value
         for (int i = 0; i < arrayOfNumbers.length; i++) {
             frequencies[arrayOfNumbers[i] - min]++;
         }
 
-        // Convert the frequencies array to Integer array and add to steps
-        Integer[] integerArray = new Integer[frequencies.length];
-        for (int i = 0; i < frequencies.length; i++) {
-            integerArray[i] = frequencies[i];
-        }
-        steps.add(Arrays.copyOf(integerArray, integerArray.length));
-
-        // Calculate the cumulative frequencies
-        int currentSum = frequencies[0];
-        for (int i = 1; i < frequencies.length; i++) {
-            currentSum += frequencies[i];
-            frequencies[i] = currentSum;
-        }
-
-        // Update the Integer array and add to steps
-        for (int i = 0; i < frequencies.length; i++) {
-            integerArray[i] = frequencies[i];
-        }
-        steps.add(Arrays.copyOf(integerArray, integerArray.length));
-
-        // Adjust frequencies to determine the final positions of values in the sorted array
-        for (int i = frequencies.length - 1; i > 0; i--) {
-            frequencies[i] = frequencies[i - 1];
-        }
-        frequencies[0] = 0;
-
-        // Update the Integer array and add to steps
-        for (int i = 0; i < frequencies.length; i++) {
-            integerArray[i] = frequencies[i];
-        }
-        steps.add(Arrays.copyOf(integerArray, integerArray.length));
+        // Add the frequencies to steps
+        steps.add(Arrays.copyOf(frequencies, frequencies.length));
 
         // Create the sorted array
         Integer[] sorted = new Integer[arrayOfNumbers.length];
 
-        // Populate the sorted array by placing values in their final positions
-        for (int i = 0; i < arrayOfNumbers.length; i++) {
-            sorted[frequencies[arrayOfNumbers[i] - min]] = arrayOfNumbers[i];
-            frequencies[arrayOfNumbers[i] - min]++;
+        int j = 0;
+        for (int i = 0; i < frequencies.length; i++) {
+            for (int k = 0; k < frequencies[i]; k++) {
+                sorted[j] = i + min;
+                j++;
+            }
         }
 
         // Add the final sorted state to steps
